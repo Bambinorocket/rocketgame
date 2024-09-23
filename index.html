@@ -21,34 +21,37 @@
             background: linear-gradient(black, darkblue, black);
         }
 
-        .star, .meteor, .alien, .satellite {
+        .star {
             position: absolute;
             background-color: white;
             border-radius: 50%;
-        }
-
-        .star {
             width: 2px;
             height: 2px;
             animation: twinkle 2s infinite;
         }
 
         .meteor {
+            position: absolute;
             width: 30px;
             height: 15px;
             background: orange;
+            border-radius: 5px;
         }
 
         .alien {
+            position: absolute;
             width: 40px;
             height: 40px;
-            background: green;
+            background: limegreen;
+            border-radius: 20%;
         }
 
         .satellite {
+            position: absolute;
             width: 20px;
             height: 40px;
             background: grey;
+            border-radius: 5px;
         }
 
         .rocket {
@@ -140,7 +143,6 @@
         var distance = 225000000;
         var fuel = 100;
         var rocketInterval;
-        var messageCount = 0;
         var gameOver = false;
 
         var distanceDisplay = document.createElement('div');
