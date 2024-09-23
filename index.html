@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rocket to Mars Game</title>
     <style>
+        /* Style CSS existant */
         body {
             margin: 0;
             color: white;
@@ -58,7 +59,34 @@
             animation: flicker 0.1s infinite alternate;
         }
 
-        #distance {
+        .fuel-tanker {
+            position: absolute;
+            bottom: 0;
+            width: 60px;
+            height: 80px;
+            background: green;
+            border-radius: 15px;
+            cursor: pointer;
+        }
+
+        #fuelBar {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 200px;
+            height: 20px;
+            background-color: red;
+            border-radius: 5px;
+        }
+
+        #fuel {
+            width: 100%;
+            height: 100%;
+            background-color: lime;
+            border-radius: 5px;
+        }
+
+        #distance, #fuelBar {
             position: absolute;
             top: 10px;
             right: 10px;
@@ -66,29 +94,6 @@
             background-color: rgba(0, 0, 0, 0.5);
             padding: 10px;
             border-radius: 5px;
-        }
-
-        #fuel {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            font-size: 24px;
-            background-color: rgba(0, 0, 0, 0.5);
-            padding: 10px;
-            border-radius: 5px;
-        }
-
-        #message {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 32px;
-            color: yellow;
-            max-width: 400px;
-            text-align: center;
-            white-space: normal;
-            display: none;
         }
 
         #finalMessage {
@@ -100,7 +105,6 @@
             color: yellow;
             text-align: center;
             display: none;
-            animation: fadeIn 2s ease-in-out;
         }
 
         @keyframes flicker {
@@ -110,18 +114,27 @@
     </style>
 </head>
 <body>
-
-    <audio id="backgroundMusic" autoplay loop>
-        <source src="espace-120280.mp3" type="audio/mpeg">
-        Your browser does not support the audio element.
-    </audio>
-
     <div id="rocketContainer"></div>
+    <div id="fuelBar">
+        <div id="fuel"></div>
+    </div>
+    <div id="distance">Distance to Mars: 225000000 km</div>
+    <div id="finalMessage">Game Over: No fuel left!</div>
 
     <script>
-        // Créer des étoiles
+        var container = document.getElementById('rocketContainer');
+        var distance = 225000000;
+        var fuel = 100; // Niveau initial de carburant
+        var fuelConsumptionRate = 1; // Consommation de carburant par seconde
+        var gameOver = false;
+        var rocketInterval, fuelTankerInterval;
+
+        // Affichage distance et carburant
+        var distanceDisplay = document.getElementById('distance');
+        var fuelBar = document.getElementById('fuel');
+
+        // Fonction pour créer des étoiles
         function createStars() {
-            var container = document.getElementById('rocketContainer');
             for (let i = 0; i < 100; i++) {
                 var star = document.createElement('div');
                 star.className = 'star';
@@ -133,41 +146,9 @@
 
         createStars();
 
-        // Variables globales
-        var container = document.getElementById('rocketContainer');
-        var distance = 225000000;
-        var rocketInterval;
-        var messageCount = 0;
-        var gameOver = false;
-        var fuel = 100;  // Jauge de carburant
-        var distanceMultiplier = 1;  // Multiplicateur de distance
-
-        // Affichage distance
-        var distanceDisplay = document.createElement('div');
-        distanceDisplay.id = 'distance';
-        distanceDisplay.innerText = 'Distance to Mars: 225000000 km';
-        container.appendChild(distanceDisplay);
-
-        // Affichage fuel
-        var fuelDisplay = document.createElement('div');
-        fuelDisplay.id = 'fuel';
-        fuelDisplay.innerText = 'Fuel: 100%';
-        container.appendChild(fuelDisplay);
-
-        // Messages spéciaux
-        var messageDisplay = document.createElement('div');
-        messageDisplay.id = 'message';
-        container.appendChild(messageDisplay);
-
-        // Message final
-        var finalMessage = document.createElement('div');
-        finalMessage.id = 'finalMessage';
-        finalMessage.innerText = "You made it to Mars!";
-        container.appendChild(finalMessage);
-
         // Créer une fusée
         function createRocket() {
-            if (gameOver || fuel <= 0) return;
+            if (gameOver) return;
 
             var rocket = document.createElement('div');
             rocket.className = 'rocket';
@@ -190,44 +171,65 @@
             }, 50);
 
             rocket.addEventListener('click', function() {
-                if (gameOver || fuel <= 0) return;
-
-                // Déduction de distance et mise à jour du fuel
-                let kmDeducted = 50000 * distanceMultiplier;
-                distance -= kmDeducted;
+                distance -= 50000;
                 distanceDisplay.innerText = 'Distance to Mars: ' + distance + ' km';
-                fuel -= 10;
-                fuelDisplay.innerText = 'Fuel: ' + fuel + '%';
-
-                // Multiplicateurs et bonus aléatoires
-                let randomMultiplier = Math.random() < 0.3 ? 2 : 1;
-                distanceMultiplier = randomMultiplier;
-
-                let message = randomMultiplier > 1 ? "Speed boost! 2x distance!" : "Normal speed.";
-                messageDisplay.innerText = message + `\nYou deducted ${kmDeducted} km!`;
-                messageDisplay.style.display = 'block';
-                setTimeout(() => {
-                    messageDisplay.style.display = 'none';
-                }, 3000);
-
-                messageCount++;
-                if (distance <= 0) {
-                    finalMessage.style.display = 'block';
-                    stopGame();
-                }
-
                 container.removeChild(rocket);
             });
         }
 
-        // Arrêter le jeu
-        function stopGame() {
-            gameOver = true;
-            clearInterval(rocketInterval);
+        // Créer une fusée ravitailleur
+        function createFuelTanker() {
+            if (gameOver) return;
+
+            var tanker = document.createElement('div');
+            tanker.className = 'fuel-tanker';
+            container.appendChild(tanker);
+
+            tanker.style.left = Math.random() * (window.innerWidth - 60) + 'px';
+
+            let movement = setInterval(() => {
+                let currentBottom = parseFloat(tanker.style.bottom) || 0;
+                if (currentBottom < window.innerHeight) {
+                    tanker.style.bottom = currentBottom + 3 + 'px';
+                } else {
+                    clearInterval(movement);
+                    container.removeChild(tanker);
+                }
+            }, 50);
+
+            tanker.addEventListener('click', function() {
+                fuel = Math.min(fuel + 20, 100); // Recharge de 20 unités de carburant
+                updateFuelBar();
+                container.removeChild(tanker);
+            });
         }
 
-        // Générer des fusées à intervalles
-        rocketInterval = setInterval(createRocket, 1500);
+        // Mettre à jour la jauge de carburant
+        function updateFuelBar() {
+            fuelBar.style.width = fuel + '%';
+            if (fuel <= 0) {
+                endGame();
+            }
+        }
+
+        // Consommation de carburant par intervalle
+        function consumeFuel() {
+            fuel -= fuelConsumptionRate;
+            updateFuelBar();
+        }
+
+        // Fin de jeu
+        function endGame() {
+            gameOver = true;
+            clearInterval(rocketInterval);
+            clearInterval(fuelTankerInterval);
+            document.getElementById('finalMessage').style.display = 'block';
+        }
+
+        // Générer des fusées et ravitailleurs à intervalles
+        rocketInterval = setInterval(createRocket, 1000);
+        fuelTankerInterval = setInterval(createFuelTanker, 5000);
+        setInterval(consumeFuel, 1000); // Réduction du carburant toutes les secondes
     </script>
 </body>
 </html>
