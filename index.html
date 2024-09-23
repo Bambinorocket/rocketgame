@@ -290,8 +290,11 @@
                         fuel -= 10; // Perdre 10% de carburant lors de la collision
                         if (fuel < 0) fuel = 0; // Limiter à 0%
                         fuelDisplay.innerText = 'Fuel: ' + fuel + '%';
+
+                        // Retirer les éléments de collision
                         container.removeChild(ufo);
                         container.removeChild(rocket);
+                        break; // Sortir de la boucle après la collision
                     }
                 }
             }, 100); // Vérification toutes les 100 ms
