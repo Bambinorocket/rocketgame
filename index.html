@@ -267,26 +267,50 @@
                 fuelDisplay.innerText = 'Fuel: ' + fuel + '%';
                 container.removeChild(ufo);
             });
+
+            // Collision entre fusée et soucoupe
+            setInterval(() => {
+                let rockets = document.getElementsByClassName('rocket');
+                for (let rocket of rockets) {
+                    if (isCollision(rocket, ufo)) {
+                        distance += 100; // Perdre 100 km
+                        distanceDisplay.innerText = 'Distance to Mars: ' + distance + ' km';
+                        container.removeChild(rocket); // Supprimer la fusée
+                        clearInterval(movement);
+                        container.removeChild(ufo); // Supprimer la soucoupe
+                        break;
+                    }
+                }
+            }, 50);
+        }
+
+        // Vérifier collision
+        function isCollision(rocket, ufo) {
+            var rocketRect = rocket.getBoundingClientRect();
+            var ufoRect = ufo.getBoundingClientRect();
+            return !(
+                rocketRect.top > ufoRect.bottom ||
+                rocketRect.bottom < ufoRect.top ||
+                rocketRect.right < ufoRect.left ||
+                rocketRect.left > ufoRect.right
+            );
         }
 
         // Démarrer le jeu
         function startGame() {
-            rocketInterval = setInterval(() => {
-                createRocket();
-                createUFO();
-            }, 1000);
+            rocketInterval = setInterval(createRocket, 2000);
+            setInterval(createUFO, 3000);
         }
 
         // Arrêter le jeu
         function stopGame() {
-            gameOver = true;
             clearInterval(rocketInterval);
+            gameOver = true;
         }
 
-        // Démarrer le jeu au chargement de la page
-        window.onload = function() {
-            startGame();
-        };
+        // Lancer le jeu
+        startGame();
     </script>
 </body>
 </html>
+
