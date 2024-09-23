@@ -274,16 +274,6 @@
                 }
             }, 50);
 
-            ufo.addEventListener('click', function() {
-                if (gameOver) return;
-
-                fuel += 30; // Ajouter 30% de carburant
-                if (fuel > 100) fuel = 100; // Limiter à 100%
-                fuelDisplay.innerText = 'Fuel: ' + fuel + '%';
-
-                container.removeChild(ufo);
-            });
-
             // Détection de collision
             setInterval(() => {
                 if (!ufo) return;
@@ -296,10 +286,12 @@
                         ufoRect.right > rocketRect.left &&
                         ufoRect.top < rocketRect.bottom &&
                         ufoRect.bottom > rocketRect.top) {
-                        fuel += 30; // Ajouter 30% de carburant lors de la collision
-                        if (fuel > 100) fuel = 100; // Limiter à 100%
+                        // Collision détectée
+                        fuel -= 10; // Perdre 10% de carburant lors de la collision
+                        if (fuel < 0) fuel = 0; // Limiter à 0%
                         fuelDisplay.innerText = 'Fuel: ' + fuel + '%';
                         container.removeChild(ufo);
+                        container.removeChild(rocket);
                     }
                 }
             }, 100); // Vérification toutes les 100 ms
