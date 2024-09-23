@@ -60,10 +60,11 @@
 
         .ufo {
             position: absolute;
-            width: 50px;
-            height: 30px;
-            background-color: lime; /* Couleur des soucoupes volantes */
-            border-radius: 50%; /* Forme arrondie */
+            width: 80px; /* Largeur augmentée pour un vaisseau plus réaliste */
+            height: 40px; /* Hauteur ajustée */
+            background: linear-gradient(to bottom, silver, darkgray); /* Dégradé pour un aspect métallique */
+            border-radius: 50% 50% 0 0; /* Forme arrondie */
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5); /* Ombre pour effet 3D */
             cursor: pointer;
             animation: moveUFO 5s linear infinite;
             transform: rotate(180deg); /* Rotation pour ressembler à une soucoupe */
@@ -247,7 +248,7 @@
 
             var ufo = document.createElement('div');
             ufo.className = 'ufo';
-            ufo.style.top = Math.random() * (window.innerHeight - 30) + 'px'; // Position aléatoire en hauteur
+            ufo.style.top = Math.random() * (window.innerHeight - 40) + 'px'; // Position aléatoire en hauteur
             container.appendChild(ufo);
 
             let movement = setInterval(() => {
@@ -270,52 +271,20 @@
             });
 
             // Collision entre fusée et soucoupe
-            setInterval(() => {
-                let rockets = document.getElementsByClassName('rocket');
-                for (let rocket of rockets) {
-                    if (isCollision(rocket, ufo)) {
-                        distance += 100; // Perdre 100 km
-                        fuel -= 10; // Perdre 10% de carburant
-                        distanceDisplay.innerText = 'Distance to Mars: ' + distance + ' km';
-                        fuelDisplay.innerText = 'Fuel: ' + fuel + '%';
-                        
-                        // Explosion visuelle
-                        rocket.style.background = 'orange'; // Changer couleur pour l'explosion
-                        ufo.style.background = 'red'; // Changer couleur pour l'explosion
-                        setTimeout(() => {
-                            container.removeChild(rocket);
-                            container.removeChild(ufo);
-                        }, 300);
-                        
-                        // Vérifier game over
-                        if (fuel <= 0) {
-                            finalMessage.style.display = 'block';
-                            stopGame();
-                        }
-                    }
+            ufo.addEventListener('animationend', function() {
+                if (parseFloat(ufo.style.left) > window.innerWidth) {
+                    container.removeChild(ufo);
                 }
-            }, 50);
-        }
-
-        // Vérifier collision
-        function isCollision(rocket, ufo) {
-            var rocketRect = rocket.getBoundingClientRect();
-            var ufoRect = ufo.getBoundingClientRect();
-            return !(
-                rocketRect.top > ufoRect.bottom ||
-                rocketRect.bottom < ufoRect.top ||
-                rocketRect.right < ufoRect.left ||
-                rocketRect.left > ufoRect.right
-            );
+            });
         }
 
         // Démarrer le jeu
         function startGame() {
-            rocketInterval = setInterval(createRocket, 2000);
-            setInterval(createUFO, 3000);
+            rocketInterval = setInterval(createRocket, 1000);
+            setInterval(createUFO, 2000);
         }
 
-        // Arrêter le jeu
+        // Stop le jeu
         function stopGame() {
             clearInterval(rocketInterval);
             gameOver = true;
