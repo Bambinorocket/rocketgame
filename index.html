@@ -156,7 +156,7 @@
         // Variables globales
         var container = document.getElementById('rocketContainer');
         var distance = 225000000; // Distance à Mars
-        var fuel = 0; // Niveau de carburant
+        var fuel = 100; // Niveau de carburant (de 0 à 100%)
         var rocketInterval;
         var messageCount = 0;
         var gameOver = false;
@@ -177,7 +177,7 @@
         // Affichage fuel
         var fuelDisplay = document.createElement('div');
         fuelDisplay.id = 'fuel';
-        fuelDisplay.innerText = 'Fuel: 0%';
+        fuelDisplay.innerText = 'Fuel: 100%';
         container.appendChild(fuelDisplay);
 
         // Messages spéciaux
@@ -188,7 +188,7 @@
         // Message final
         var finalMessage = document.createElement('div');
         finalMessage.id = 'finalMessage';
-        finalMessage.innerText = "Now you know why you should vote for Donald Trump.";
+        finalMessage.innerText = "Game Over! You ran out of fuel.";
         container.appendChild(finalMessage);
 
         // Créer une fusée
@@ -253,7 +253,7 @@
             let movement = setInterval(() => {
                 let currentLeft = parseFloat(ufo.style.left) || 0;
                 if (currentLeft < window.innerWidth) {
-                    ufo.style.left = currentLeft + 8 + 'px'; // Vitesse des soucoupes
+                    ufo.style.left = currentLeft + 5 + 'px'; // Vitesse réduite des soucoupes
                 } else {
                     clearInterval(movement);
                     container.removeChild(ufo);
@@ -264,6 +264,7 @@
                 if (gameOver) return;
 
                 fuel += 30; // Ajouter 30% de carburant
+                if (fuel > 100) fuel = 100; // Limiter à 100%
                 fuelDisplay.innerText = 'Fuel: ' + fuel + '%';
                 container.removeChild(ufo);
             });
@@ -274,11 +275,23 @@
                 for (let rocket of rockets) {
                     if (isCollision(rocket, ufo)) {
                         distance += 100; // Perdre 100 km
+                        fuel -= 10; // Perdre 10% de carburant
                         distanceDisplay.innerText = 'Distance to Mars: ' + distance + ' km';
-                        container.removeChild(rocket); // Supprimer la fusée
-                        clearInterval(movement);
-                        container.removeChild(ufo); // Supprimer la soucoupe
-                        break;
+                        fuelDisplay.innerText = 'Fuel: ' + fuel + '%';
+                        
+                        // Explosion visuelle
+                        rocket.style.background = 'orange'; // Changer couleur pour l'explosion
+                        ufo.style.background = 'red'; // Changer couleur pour l'explosion
+                        setTimeout(() => {
+                            container.removeChild(rocket);
+                            container.removeChild(ufo);
+                        }, 300);
+                        
+                        // Vérifier game over
+                        if (fuel <= 0) {
+                            finalMessage.style.display = 'block';
+                            stopGame();
+                        }
                     }
                 }
             }, 50);
@@ -313,4 +326,3 @@
     </script>
 </body>
 </html>
-
