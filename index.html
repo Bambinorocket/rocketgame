@@ -275,7 +275,7 @@
 
             var ufo = document.createElement('div');
             ufo.className = 'ufo';
-            ufo.style.top = Math.random() * (window.innerHeight - 40) + 'px'; // Position aléatoire en hauteur
+            ufo.style.top = Math.random() * (window.innerHeight - 40) + 'px'; // Position verticale aléatoire
             container.appendChild(ufo);
 
             let movement = setInterval(() => {
@@ -304,7 +304,7 @@
                         if (fuel < 0) fuel = 0; // Limiter à 0%
                         fuelDisplay.innerText = 'Fuel: ' + fuel + '%';
 
-                        // Créer une explosion
+                        // Créer des explosions
                         let explosion1 = document.createElement('div');
                         explosion1.className = 'explosion';
                         explosion1.style.left = ufoRect.left + 'px';
@@ -340,6 +340,7 @@
             }, 1000);
         }
 
+        createStars(); 
         startGame();
     </script>
 </body>
