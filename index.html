@@ -66,11 +66,12 @@
             border-radius: 50%; /* Forme arrondie */
             cursor: pointer;
             animation: moveUFO 5s linear infinite;
+            transform: rotate(180deg); /* Rotation pour ressembler à une soucoupe */
         }
 
         @keyframes moveUFO {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(100vw); }
+            0% { transform: translateX(0) rotate(180deg); }
+            100% { transform: translateX(100vw) rotate(180deg); }
         }
 
         #distance {
@@ -118,26 +119,9 @@
             animation: fadeIn 2s ease-in-out;
         }
 
-        #flag {
-            position: absolute;
-            top: 50%;
-            left: 10px;
-            width: 100px;
-            height: 60px;
-            background-image: url('https://upload.wikimedia.org/wikipedia/en/a/a4/Flag_of_the_United_States.svg'); 
-            background-size: cover;
-            animation: wave 2s infinite alternate;
-            display: none;
-        }
-
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
-        }
-
-        @keyframes wave {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(10deg); }
         }
 
         @keyframes flicker {
@@ -171,13 +155,11 @@
 
         // Variables globales
         var container = document.getElementById('rocketContainer');
-        var distance = 225000000;
+        var distance = 225000000; // Distance à Mars
         var fuel = 0; // Niveau de carburant
         var rocketInterval;
         var messageCount = 0;
         var gameOver = false;
-        var kmDeductionOptions = [50000, 80000];
-        var currentDeductionIndex = 0;
 
         var messages = [
             "You gained 50 km!",
@@ -209,11 +191,6 @@
         finalMessage.innerText = "Now you know why you should vote for Donald Trump.";
         container.appendChild(finalMessage);
 
-        // Drapeau américain
-        var flag = document.createElement('div');
-        flag.id = 'flag';
-        container.appendChild(flag);
-
         // Créer une fusée
         function createRocket() {
             if (gameOver) return;
@@ -241,8 +218,8 @@
             rocket.addEventListener('click', function() {
                 if (gameOver) return;
 
-                let kmDeducted = kmDeductionOptions[currentDeductionIndex];
-                distance -= kmDeducted;
+                let kmGained = 50; // Ajout de kilomètres
+                distance -= kmGained;
                 distanceDisplay.innerText = 'Distance to Mars: ' + distance + ' km';
 
                 let randomIndex = Math.floor(Math.random() * messages.length);
@@ -250,18 +227,16 @@
                 messageDisplay.style.display = 'block';
                 setTimeout(() => {
                     messageDisplay.style.display = 'none';
-                }, 7000);
+                }, 3000);
 
                 messageCount++;
                 if (messageCount >= 50) {
                     setTimeout(() => {
                         finalMessage.style.display = 'block';
-                        flag.style.display = 'block';
                         stopGame();
                     }, 3000);
                 }
 
-                currentDeductionIndex = (currentDeductionIndex + 1) % kmDeductionOptions.length;
                 container.removeChild(rocket);
             });
         }
@@ -272,13 +247,13 @@
 
             var ufo = document.createElement('div');
             ufo.className = 'ufo';
-            ufo.style.top = Math.random() * window.innerHeight + 'px'; // Position aléatoire en hauteur
+            ufo.style.top = Math.random() * (window.innerHeight - 30) + 'px'; // Position aléatoire en hauteur
             container.appendChild(ufo);
 
             let movement = setInterval(() => {
                 let currentLeft = parseFloat(ufo.style.left) || 0;
                 if (currentLeft < window.innerWidth) {
-                    ufo.style.left = currentLeft + 6 + 'px'; // Vitesse des soucoupes
+                    ufo.style.left = currentLeft + 8 + 'px'; // Vitesse des soucoupes
                 } else {
                     clearInterval(movement);
                     container.removeChild(ufo);
