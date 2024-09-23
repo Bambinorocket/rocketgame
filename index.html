@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rocket to Mars Game</title>
     <style>
-        /* Style CSS existant */
         body {
             margin: 0;
             color: white;
@@ -22,18 +21,34 @@
             background: linear-gradient(black, darkblue, black);
         }
 
-        .star {
+        .star, .meteor, .alien, .satellite {
             position: absolute;
             background-color: white;
             border-radius: 50%;
+        }
+
+        .star {
             width: 2px;
             height: 2px;
             animation: twinkle 2s infinite;
         }
 
-        @keyframes twinkle {
-            0%, 100% { opacity: 0; }
-            50% { opacity: 1; }
+        .meteor {
+            width: 30px;
+            height: 15px;
+            background: orange;
+        }
+
+        .alien {
+            width: 40px;
+            height: 40px;
+            background: green;
+        }
+
+        .satellite {
+            width: 20px;
+            height: 40px;
+            background: grey;
         }
 
         .rocket {
@@ -59,34 +74,7 @@
             animation: flicker 0.1s infinite alternate;
         }
 
-        .fuel-tanker {
-            position: absolute;
-            bottom: 0;
-            width: 60px;
-            height: 80px;
-            background: green;
-            border-radius: 15px;
-            cursor: pointer;
-        }
-
-        #fuelBar {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            width: 200px;
-            height: 20px;
-            background-color: red;
-            border-radius: 5px;
-        }
-
-        #fuel {
-            width: 100%;
-            height: 100%;
-            background-color: lime;
-            border-radius: 5px;
-        }
-
-        #distance, #fuelBar {
+        #distance, #fuel {
             position: absolute;
             top: 10px;
             right: 10px;
@@ -96,15 +84,32 @@
             border-radius: 5px;
         }
 
-        #finalMessage {
+        #message, #finalMessage {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+            text-align: center;
+            white-space: normal;
+        }
+
+        #message {
+            font-size: 32px;
+            color: yellow;
+            max-width: 400px;
+            display: none;
+        }
+
+        #finalMessage {
             font-size: 48px;
             color: yellow;
-            text-align: center;
             display: none;
+            animation: fadeIn 2s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         @keyframes flicker {
@@ -114,28 +119,13 @@
     </style>
 </head>
 <body>
+
     <div id="rocketContainer"></div>
-    <div id="fuelBar">
-        <div id="fuel"></div>
-    </div>
-    <div id="distance">Distance to Mars: 225000000 km</div>
-    <div id="finalMessage">Game Over: No fuel left!</div>
 
     <script>
-        var container = document.getElementById('rocketContainer');
-        var distance = 225000000;
-        var fuel = 100; // Niveau initial de carburant
-        var fuelConsumptionRate = 1; // Consommation de carburant par seconde
-        var gameOver = false;
-        var rocketInterval, fuelTankerInterval;
-
-        // Affichage distance et carburant
-        var distanceDisplay = document.getElementById('distance');
-        var fuelBar = document.getElementById('fuel');
-
-        // Fonction pour créer des étoiles
         function createStars() {
-            for (let i = 0; i < 100; i++) {
+            var container = document.getElementById('rocketContainer');
+            for (let i = 0; i < 100; i++) { 
                 var star = document.createElement('div');
                 star.className = 'star';
                 star.style.left = Math.random() * window.innerWidth + 'px';
@@ -144,9 +134,34 @@
             }
         }
 
-        createStars();
+        createStars(); 
 
-        // Créer une fusée
+        var container = document.getElementById('rocketContainer');
+        var distance = 225000000;
+        var fuel = 100;
+        var rocketInterval;
+        var messageCount = 0;
+        var gameOver = false;
+
+        var distanceDisplay = document.createElement('div');
+        distanceDisplay.id = 'distance';
+        distanceDisplay.innerText = 'Distance to Mars: 225000000 km';
+        container.appendChild(distanceDisplay);
+
+        var fuelDisplay = document.createElement('div');
+        fuelDisplay.id = 'fuel';
+        fuelDisplay.innerText = 'Fuel: 100%';
+        container.appendChild(fuelDisplay);
+
+        var messageDisplay = document.createElement('div');
+        messageDisplay.id = 'message';
+        container.appendChild(messageDisplay);
+
+        var finalMessage = document.createElement('div');
+        finalMessage.id = 'finalMessage';
+        finalMessage.innerText = "You've reached Mars!";
+        container.appendChild(finalMessage);
+
         function createRocket() {
             if (gameOver) return;
 
@@ -171,65 +186,71 @@
             }, 50);
 
             rocket.addEventListener('click', function() {
+                if (gameOver) return;
+
                 distance -= 50000;
-                distanceDisplay.innerText = 'Distance to Mars: ' + distance + ' km';
+                fuel -= 5;
+                updateDisplays();
                 container.removeChild(rocket);
+
+                if (fuel <= 0 || distance <= 0) {
+                    stopGame();
+                }
             });
         }
 
-        // Créer une fusée ravitailleur
-        function createFuelTanker() {
+        function updateDisplays() {
+            distanceDisplay.innerText = 'Distance to Mars: ' + distance + ' km';
+            fuelDisplay.innerText = 'Fuel: ' + fuel + '%';
+        }
+
+        function createBonus(type) {
             if (gameOver) return;
 
-            var tanker = document.createElement('div');
-            tanker.className = 'fuel-tanker';
-            container.appendChild(tanker);
+            var bonus = document.createElement('div');
+            bonus.className = type;
+            container.appendChild(bonus);
 
-            tanker.style.left = Math.random() * (window.innerWidth - 60) + 'px';
+            bonus.style.left = Math.random() * (window.innerWidth - 50) + 'px';
+            bonus.style.top = Math.random() * (window.innerHeight - 100) + 'px';
 
-            let movement = setInterval(() => {
-                let currentBottom = parseFloat(tanker.style.bottom) || 0;
-                if (currentBottom < window.innerHeight) {
-                    tanker.style.bottom = currentBottom + 3 + 'px';
-                } else {
-                    clearInterval(movement);
-                    container.removeChild(tanker);
-                }
-            }, 50);
+            bonus.addEventListener('click', function() {
+                if (gameOver) return;
 
-            tanker.addEventListener('click', function() {
-                fuel = Math.min(fuel + 20, 100); // Recharge de 20 unités de carburant
-                updateFuelBar();
-                container.removeChild(tanker);
+                let fuelBonus = 0;
+                if (type === 'meteor') fuelBonus = 30;
+                if (type === 'alien') fuelBonus = 50;
+                if (type === 'satellite') fuelBonus = 20;
+
+                fuel = Math.min(fuel + fuelBonus, 100);
+                updateDisplays();
+                messageDisplay.innerText = `Bonus: +${fuelBonus}% fuel!`;
+                messageDisplay.style.display = 'block';
+                setTimeout(() => {
+                    messageDisplay.style.display = 'none';
+                }, 2000);
+
+                container.removeChild(bonus);
             });
         }
 
-        // Mettre à jour la jauge de carburant
-        function updateFuelBar() {
-            fuelBar.style.width = fuel + '%';
-            if (fuel <= 0) {
-                endGame();
+        function stopGame() {
+            gameOver = true;
+            clearInterval(rocketInterval);
+            if (distance <= 0) {
+                finalMessage.style.display = 'block';
+            } else {
+                messageDisplay.innerText = "Game Over! You ran out of fuel!";
+                messageDisplay.style.display = 'block';
             }
         }
 
-        // Consommation de carburant par intervalle
-        function consumeFuel() {
-            fuel -= fuelConsumptionRate;
-            updateFuelBar();
-        }
-
-        // Fin de jeu
-        function endGame() {
-            gameOver = true;
-            clearInterval(rocketInterval);
-            clearInterval(fuelTankerInterval);
-            document.getElementById('finalMessage').style.display = 'block';
-        }
-
-        // Générer des fusées et ravitailleurs à intervalles
         rocketInterval = setInterval(createRocket, 1000);
-        fuelTankerInterval = setInterval(createFuelTanker, 5000);
-        setInterval(consumeFuel, 1000); // Réduction du carburant toutes les secondes
+
+        // Bonus generation
+        setInterval(() => createBonus('meteor'), 5000);
+        setInterval(() => createBonus('alien'), 15000);
+        setInterval(() => createBonus('satellite'), 10000);
     </script>
 </body>
 </html>
