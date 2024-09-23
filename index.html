@@ -142,6 +142,20 @@
             0% { height: 40px; opacity: 0.8; }
             100% { height: 60px; opacity: 0.3; }
         }
+
+        .explosion {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(255,0,0,1) 0%, rgba(255,165,0,1) 50%, rgba(255,255,0,1) 100%);
+            border-radius: 50%;
+            animation: explode 0.5s forwards;
+        }
+
+        @keyframes explode {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
     </style>
 </head>
 <body>
@@ -266,19 +280,18 @@
 
             let movement = setInterval(() => {
                 let currentLeft = parseFloat(ufo.style.left) || 0;
-                if (currentLeft < window.innerWidth) {
-                    ufo.style.left = currentLeft + 5 + 'px'; // Vitesse réduite des soucoupes
-                } else {
+                ufo.style.left = currentLeft + 2 + 'px'; // Déplacement constant vers la droite
+
+                if (currentLeft > window.innerWidth) {
                     clearInterval(movement);
                     container.removeChild(ufo);
                 }
             }, 50);
 
-            // Détection de collision
+            // Vérification des collisions avec les fusées
             setInterval(() => {
-                if (!ufo) return;
-                var rocketElements = document.getElementsByClassName('rocket');
-                for (let rocket of rocketElements) {
+                let rockets = document.getElementsByClassName('rocket');
+                for (let rocket of rockets) {
                     let ufoRect = ufo.getBoundingClientRect();
                     let rocketRect = rocket.getBoundingClientRect();
 
@@ -290,6 +303,19 @@
                         fuel -= 10; // Perdre 10% de carburant lors de la collision
                         if (fuel < 0) fuel = 0; // Limiter à 0%
                         fuelDisplay.innerText = 'Fuel: ' + fuel + '%';
+
+                        // Créer une explosion
+                        let explosion1 = document.createElement('div');
+                        explosion1.className = 'explosion';
+                        explosion1.style.left = ufoRect.left + 'px';
+                        explosion1.style.top = ufoRect.top + 'px';
+                        container.appendChild(explosion1);
+
+                        let explosion2 = document.createElement('div');
+                        explosion2.className = 'explosion';
+                        explosion2.style.left = rocketRect.left + 'px';
+                        explosion2.style.top = rocketRect.top + 'px';
+                        container.appendChild(explosion2);
 
                         // Retirer les éléments de collision
                         container.removeChild(ufo);
