@@ -10,7 +10,7 @@
             color: white;
             font-family: Arial, sans-serif;
             overflow: hidden;
-            background-color: black; /* Fond noir pour l'espace */
+            background-color: black;
         }
 
         #rocketContainer {
@@ -18,7 +18,7 @@
             width: 100vw;
             height: 100vh;
             overflow: hidden;
-            background: linear-gradient(black, darkblue, black); /* Arrière-plan espace */
+            background: linear-gradient(black, darkblue, black);
         }
 
         .star {
@@ -66,7 +66,7 @@
             border-radius: 50%;
             cursor: pointer;
             animation: moveUFO 5s linear infinite;
-            transform: rotate(180deg); /* Rotation pour ressembler à une soucoupe */
+            transform: rotate(180deg);
             box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.5);
         }
 
@@ -150,6 +150,7 @@
             background: radial-gradient(circle, rgba(255,0,0,1) 0%, rgba(255,165,0,1) 50%, rgba(255,255,0,1) 100%);
             border-radius: 50%;
             animation: explode 0.5s forwards;
+            pointer-events: none;
         }
 
         @keyframes explode {
@@ -159,11 +160,6 @@
     </style>
 </head>
 <body>
-    <audio id="backgroundMusic" autoplay loop>
-        <source src="espace-120280.mp3" type="audio/mpeg">
-        Your browser does not support the audio element.
-    </audio>
-
     <div id="rocketContainer"></div>
     
     <script>
@@ -183,8 +179,8 @@
 
         // Variables globales
         var container = document.getElementById('rocketContainer');
-        var distance = 225000000; // Distance à Mars
-        var fuel = 100; // Niveau de carburant (de 0 à 100%)
+        var distance = 225000000;
+        var fuel = 100;
         var rocketInterval;
         var messageCount = 0;
         var gameOver = false;
@@ -276,12 +272,12 @@
             var ufo = document.createElement('div');
             ufo.className = 'ufo';
             ufo.style.top = Math.random() * (window.innerHeight - 40) + 'px'; 
-            ufo.style.left = '0px'; // Starting point at the left edge
+            ufo.style.left = '0px';
             container.appendChild(ufo);
 
             let movement = setInterval(() => {
                 let currentLeft = parseFloat(ufo.style.left) || 0;
-                ufo.style.left = currentLeft + 2 + 'px'; // Move horizontally
+                ufo.style.left = currentLeft + 2 + 'px';
 
                 // Remove UFO once it goes off screen
                 if (currentLeft > window.innerWidth) {
@@ -297,10 +293,11 @@
                 if (fuel > 100) fuel = 100; // Pas plus que 100%
                 fuelDisplay.innerText = 'Fuel: ' + fuel + '%';
 
+                // Créer explosion
                 var explosion = document.createElement('div');
                 explosion.className = 'explosion';
-                explosion.style.left = ufo.style.left;
-                explosion.style.top = ufo.style.top;
+                explosion.style.left = ufo.style.left; // Positionner l'explosion
+                explosion.style.top = ufo.style.top; // Positionner l'explosion
                 container.appendChild(explosion);
 
                 setTimeout(function() {
