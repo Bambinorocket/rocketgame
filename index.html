@@ -10,7 +10,7 @@
             color: white;
             font-family: Arial, sans-serif;
             overflow: hidden;
-            background-color: black;
+            background-color: black; /* Fond noir pour l'espace */
         }
 
         #rocketContainer {
@@ -18,7 +18,7 @@
             width: 100vw;
             height: 100vh;
             overflow: hidden;
-            background: linear-gradient(black, darkblue, black);
+            background: linear-gradient(black, darkblue, black); /* Arrière-plan espace */
         }
 
         .star {
@@ -60,32 +60,32 @@
 
         .ufo {
             position: absolute;
-            width: 70px;
-            height: 40px;
-            background-color: grey;
-            border-radius: 50%;
+            width: 70px; /* Largeur de la soucoupe */
+            height: 40px; /* Hauteur de la soucoupe */
+            background-color: grey; /* Couleur de la soucoupe */
+            border-radius: 50%; /* Forme arrondie */
             cursor: pointer;
             animation: moveUFO 5s linear infinite;
-            transform: rotate(180deg);
+            transform: rotate(180deg); /* Rotation pour ressembler à une soucoupe */
             box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.5);
         }
 
         .ufo::before, .ufo::after {
             content: '';
             position: absolute;
-            top: 10px; 
+            top: 10px; /* Position des hublots */
             width: 10px;
             height: 10px;
-            background: white; 
-            border-radius: 50%; 
+            background: white; /* Couleur des hublots */
+            border-radius: 50%; /* Forme des hublots */
         }
 
         .ufo::before {
-            left: 15px; 
+            left: 15px; /* Position du premier hublot */
         }
 
         .ufo::after {
-            left: 45px; 
+            left: 45px; /* Position du deuxième hublot */
         }
 
         #distance {
@@ -150,7 +150,6 @@
             background: radial-gradient(circle, rgba(255,0,0,1) 0%, rgba(255,165,0,1) 50%, rgba(255,255,0,1) 100%);
             border-radius: 50%;
             animation: explode 0.5s forwards;
-            pointer-events: none;
         }
 
         @keyframes explode {
@@ -160,6 +159,11 @@
     </style>
 </head>
 <body>
+    <audio id="backgroundMusic" autoplay loop>
+        <source src="espace-120280.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
     <div id="rocketContainer"></div>
     
     <script>
@@ -179,8 +183,8 @@
 
         // Variables globales
         var container = document.getElementById('rocketContainer');
-        var distance = 225000000;
-        var fuel = 100;
+        var distance = 225000000; // Distance à Mars
+        var fuel = 100; // Niveau de carburant (de 0 à 100%)
         var rocketInterval;
         var messageCount = 0;
         var gameOver = false;
@@ -271,64 +275,55 @@
 
             var ufo = document.createElement('div');
             ufo.className = 'ufo';
-            ufo.style.top = Math.random() * (window.innerHeight - 40) + 'px'; 
-            ufo.style.left = '0px';
+            ufo.style.top = Math.random() * (window.innerHeight - 40) + 'px'; // Position verticale aléatoire
             container.appendChild(ufo);
 
             let movement = setInterval(() => {
                 let currentLeft = parseFloat(ufo.style.left) || 0;
-                ufo.style.left = currentLeft + 2 + 'px';
+                ufo.style.left = currentLeft + 2 + 'px'; // Déplacement constant vers la droite
 
-                // Remove UFO once it goes off screen
                 if (currentLeft > window.innerWidth) {
                     clearInterval(movement);
                     container.removeChild(ufo);
                 }
-            }, 30);
+            }, 50);
 
-            ufo.addEventListener('click', function() {
-                if (gameOver) return;
+            // Vérification des collisions avec les fusées
+            setInterval(() => {
+                let rockets = document.getElementsByClassName('rocket');
+                for (let rocket of rockets) {
+                    let ufoRect = ufo.getBoundingClientRect();
+                    let rocketRect = rocket.getBoundingClientRect();
 
-                fuel += 20; // Augmenter le carburant
-                if (fuel > 100) fuel = 100; // Pas plus que 100%
-                fuelDisplay.innerText = 'Fuel: ' + fuel + '%';
+                    if (ufoRect.left < rocketRect.right &&
+                        ufoRect.right > rocketRect.left &&
+                        ufoRect.top < rocketRect.bottom &&
+                        ufoRect.bottom > rocketRect.top) {
+                        // Collision détectée
+                        fuel -= 10; // Perdre 10% de carburant lors de la collision
+                        if (fuel < 0) fuel = 0; // Limiter à 0%
+                        fuelDisplay.innerText = 'Fuel: ' + fuel + '%';
 
-                // Créer explosion
-                var explosion = document.createElement('div');
-                explosion.className = 'explosion';
-                explosion.style.left = ufo.style.left; // Positionner l'explosion
-                explosion.style.top = ufo.style.top; // Positionner l'explosion
-                container.appendChild(explosion);
+                        // Créer des explosions
+                        let explosion1 = document.createElement('div');
+                        explosion1.className = 'explosion';
+                        explosion1.style.left = ufoRect.left + 'px';
+                        explosion1.style.top = ufoRect.top + 'px';
+                        container.appendChild(explosion1);
 
-                setTimeout(function() {
-                    container.removeChild(explosion);
-                }, 500); // Explosion disparaît après 500ms
+                        let explosion2 = document.createElement('div');
+                        explosion2.className = 'explosion';
+                        explosion2.style.left = rocketRect.left + 'px';
+                        explosion2.style.top = rocketRect.top + 'px';
+                        container.appendChild(explosion2);
 
-                container.removeChild(ufo);
-            });
-        }
-
-        // Lancer le jeu
-        function startGame() {
-            if (rocketInterval) clearInterval(rocketInterval);
-
-            rocketInterval = setInterval(function() {
-                createRocket();
-                createUFO();
-                updateGameStatus();
-            }, 1000); // Créer des fusées et des soucoupes toutes les secondes
-        }
-
-        // Mettre à jour le statut du jeu (fuel, distance)
-        function updateGameStatus() {
-            fuel -= 1; // Consommation du carburant
-            fuelDisplay.innerText = 'Fuel: ' + fuel + '%';
-
-            if (fuel <= 0) {
-                fuelDisplay.innerText = 'Fuel: 0%';
-                finalMessage.style.display = 'block';
-                stopGame();
-            }
+                        // Retirer les éléments de collision
+                        container.removeChild(ufo);
+                        container.removeChild(rocket);
+                        break; // Sortir de la boucle après la collision
+                    }
+                }
+            }, 100); // Vérification toutes les 100 ms
         }
 
         // Arrêter le jeu
@@ -337,7 +332,15 @@
             gameOver = true;
         }
 
-        // Initialiser le jeu
+        // Démarrer le jeu
+        function startGame() {
+            rocketInterval = setInterval(() => {
+                createRocket();
+                if (Math.random() < 0.5) createUFO(); // Soucoupe volante aléatoire
+            }, 1000);
+        }
+
+        createStars(); 
         startGame();
     </script>
 </body>
