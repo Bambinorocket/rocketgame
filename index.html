@@ -127,6 +127,27 @@
             white-space: normal;
             display: none;
         }
+
+        .explosion {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background-image: url('https://example.com/explosion.png');
+            background-size: cover;
+            pointer-events: none;
+            animation: explode 0.5s ease-out forwards;
+        }
+
+        @keyframes explode {
+            from {
+                transform: scale(0.5);
+                opacity: 1;
+            }
+            to {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -169,6 +190,7 @@
                 let currentBottom = parseFloat(rocket.style.bottom) || 0;
                 if (currentBottom < window.innerHeight) {
                     rocket.style.bottom = currentBottom + 4 + 'px';
+                    checkCollision(rocket);
                 } else {
                     clearInterval(movement);
                     container.removeChild(rocket);
@@ -189,6 +211,7 @@
 
             var ufo = document.createElement('div');
             ufo.className = isBonus ? 'ufo-bonus' : 'ufo';
+            ufo.style.left = '0px';
             ufo.style.top = Math.random() * (window.innerHeight - 40) + 'px';
             container.appendChild(ufo);
 
@@ -200,6 +223,7 @@
                     clearInterval(movement);
                     container.removeChild(ufo);
                 }
+                checkCollision(ufo);
             }, 50);
 
             ufo.addEventListener('click', function() {
@@ -213,6 +237,41 @@
                 }
                 container.removeChild(ufo);
             });
+        }
+
+        // Vérifier les collisions entre la fusée et les soucoupes
+        function checkCollision(element) {
+            var rockets = document.querySelectorAll('.rocket');
+            rockets.forEach(rocket => {
+                var rocketRect = rocket.getBoundingClientRect();
+                var elementRect = element.getBoundingClientRect();
+                if (
+                    rocketRect.left < elementRect.right &&
+                    rocketRect.right > elementRect.left &&
+                    rocketRect.top < elementRect.bottom &&
+                    rocketRect.bottom > elementRect.top
+                ) {
+                    // Créer l'animation d'explosion
+                    createExplosion((rocketRect.left + elementRect.left) / 2, (rocketRect.top + elementRect.top) / 2);
+
+                    // Supprimer les éléments après la collision
+                    container.removeChild(rocket);
+                    container.removeChild(element);
+                }
+            });
+        }
+
+        // Créer une explosion
+        function createExplosion(x, y) {
+            var explosion = document.createElement('div');
+            explosion.className = 'explosion';
+            explosion.style.left = x + 'px';
+            explosion.style.top = y + 'px';
+            container.appendChild(explosion);
+
+            setTimeout(() => {
+                container.removeChild(explosion);
+            }, 500); // Supprimer l'explosion après 0.5s
         }
 
         // Démarrer le jeu
